@@ -9,7 +9,6 @@ builder.Services.AddDbContext<ActivitiesContext>(opt => opt.UseNpgsql("Host=loca
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
