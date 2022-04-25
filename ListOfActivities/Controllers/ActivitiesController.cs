@@ -1,12 +1,6 @@
 #nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ListOfActivities;
 using ListOfActivities.Models;
 
 namespace ListOfActivities.Controllers
@@ -52,6 +46,8 @@ namespace ListOfActivities.Controllers
                 return BadRequest();
             }
 
+            TimeChecker(ref activities);
+
             _context.Entry(activities).State = EntityState.Modified;
 
             try
@@ -74,10 +70,16 @@ namespace ListOfActivities.Controllers
         }
 
         // POST: api/Activities
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Activities>> PostActivities(Activities activities)
         {
+            TimeChecker(ref activities);
+
+            if (!ModelState.IsValid)
+            {
+                BadRequest(activities);
+            }
+
             _context.Activities.Add(activities);
             await _context.SaveChangesAsync();
 
@@ -103,6 +105,14 @@ namespace ListOfActivities.Controllers
         private bool ActivitiesExists(int id)
         {
             return _context.Activities.Any(e => e.Id == id);
+        }
+
+        private void TimeChecker(ref Activities activities)
+        {
+            if (activities.EventTime.Kind.HasFlag(DateTimeKind.Unspecified) || activities.EventTime.Kind.HasFlag(DateTimeKind.Local))
+            {
+                activities.EventTime = activities.EventTime.ToUniversalTime();
+            }
         }
     }
 }
