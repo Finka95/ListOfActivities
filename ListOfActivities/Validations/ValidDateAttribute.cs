@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 public class ValidDateAttribute : ValidationAttribute
 {
-    private DateTime _minimumDate = DateTime.Now;
+    private DateTime _minimumDate = DateTime.Now.AddDays(-1);
 
     public ValidDateAttribute()
         : base() { }
