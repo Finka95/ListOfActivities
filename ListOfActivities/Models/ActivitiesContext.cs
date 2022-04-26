@@ -8,7 +8,6 @@ namespace ListOfActivities.Models
 		public ActivitiesContext(DbContextOptions options)
 			:base(options)
 		{
-			Database.EnsureDeleted();
 			Database.EnsureCreated();
 		}
 	}
