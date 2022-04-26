@@ -1,4 +1,5 @@
 #nullable disable
+using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ListOfActivities.Models;
@@ -20,6 +21,10 @@ namespace ListOfActivities.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Activities>>> GetActivities()
         {
+            var headersListProp = CheckHeaders();
+            if (headersListProp != null)
+                return headersListProp;
+
             return await _context.Activities.ToListAsync();
         }
 
@@ -113,6 +118,38 @@ namespace ListOfActivities.Controllers
             {
                 activities.EventTime = activities.EventTime.ToUniversalTime();
             }
+        }
+
+        private List<Activities> CheckHeaders()
+        {
+            List<Activities> result = new List<Activities>();
+            DateTime dateTimeFrom;
+
+            var organizer = Request.Headers["organizer"].ToString();
+            var datetimeParse = DateTime.TryParse(Request.Headers["datetime"].ToString(), out dateTimeFrom);
+            dateTimeFrom = dateTimeFrom.ToUniversalTime();
+
+            if (datetimeParse)
+            {
+                DateTime dateTimeTo = dateTimeFrom.AddDays(7);
+                var events = _context.Activities.Where(a => a.EventTime >= dateTimeFrom && a.EventTime < dateTimeTo).ToList();
+                if (events.Count > 0)
+                {
+                    result.AddRange(events);
+                    return result;
+                }
+            }
+            else if (!String.IsNullOrEmpty(organizer))
+            {
+                var events = _context.Activities.Where(a => a.Organizer == organizer).ToList();
+                if (events.Count > 0)
+                {
+                    result.AddRange(events);
+                    return result;
+                }
+            }
+
+            return null;
         }
     }
 }
